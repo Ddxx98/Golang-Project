@@ -20,13 +20,14 @@ function Alert(props) {
         //const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjIzNzU0NmUxYWYyYTA5NDZhMzFmMDJhIiwiaWF0IjoxNjQ3NzkzMjY2LCJleHAiOjE2NDgzOTgwNjZ9.gQRci9zeR7PSo5ZNTIYAAgCll4jqh49qMjZ5KjRAwiA"
         let config = {
             headers: {
-                Authorization: 'Bearer ' + token
+                Authorization: token
             }
         }
         let id = props.id
+        console.log("ID",id)
         
 
-        axios.put(`http://localhost:8080/orders/${id}`, {}, config)
+        axios.delete(`http://localhost:8080/orders/${id}`,config)
             .then(res => {
                 console.log(res);
                 console.log("alert closed");

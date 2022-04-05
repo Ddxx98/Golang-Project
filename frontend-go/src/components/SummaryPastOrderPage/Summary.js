@@ -92,7 +92,9 @@ function Summary(props) {
         height: "1.5px",
         width: width
     }
-
+    const price = [
+        659, 499, 559, 1199, 399, 999, 99
+    ]
     // console.log("washType: ",washType);
     // console.log("washPrice: ",washPrice);
     // console.log("totalPrice: ",totalPrice);
@@ -193,10 +195,10 @@ function Summary(props) {
                                             {washType[index]}
                                         </td>
                                         <td className='price__calculation'>
-                                            {product.quantity} x {washPrice[index]}
+                                            {product.quantity} x {price[index]}
                                         </td>
                                         <td className='product__price'>
-                                            {Price[index]}
+                                            {price[index] * product.quantity}
                                         </td>
                                     </tr>
                                 )

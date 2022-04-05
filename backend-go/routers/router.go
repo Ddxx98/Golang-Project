@@ -15,5 +15,6 @@ func Router() *mux.Router {
 	router.Handle("/orders", middleware.TokenAuthMiddleware(controllers.PlaceOrder)).Methods("POST")
 	router.Handle("/orders/{id}", middleware.TokenAuthMiddleware(controllers.CancelOrder)).Methods("DELETE")
 	router.Handle("/orders", middleware.TokenAuthMiddleware(controllers.GetOrders)).Methods("GET")
+	router.Handle("/orders/{id}",middleware.TokenAuthMiddleware(controllers.UpdateOrder)).Methods("PUT")
 	return router
 }

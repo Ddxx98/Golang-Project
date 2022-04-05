@@ -112,7 +112,7 @@ function TableComponent(props) {
                                 {alertIsOpen && <Alert
                                     handleClose={toggleAlertPopup}
                                     content={orderNo}
-                                    id={currOrder._id}
+                                    id={order.id}
                                 />}
                                 {summaryIsOpen && <Summary
                                     handleSummaryClose={toggleSummaryPopup}
