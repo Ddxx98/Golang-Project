@@ -73,9 +73,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request){
 	var user models.User
 	_ = json.NewDecoder(r.Body).Decode(&user)
 	user.Password = HashPassword(user.Password)
+	err := userCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&user)
+	if err == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode("User already exists")
+		return
+	}
 	insertResult, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		log.Fatal(err)
+		return
 	}
 	fmt.Println(r.Body)
 	fmt.Println("Inserted a Single User ", insertResult.InsertedID)
@@ -142,9 +150,9 @@ func CancelOrder(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	id := strings.Split(r.URL.Path, "/")[2]
-	fmt.Println(id)
-	result, err := orderCollection.DeleteOne(context.Background(), bson.M{"_id": id})
+	OrderId := strings.Split(r.URL.Path, "/")[2]
+	fmt.Println(OrderId)
+	result,err := orderCollection.DeleteOne(context.Background(), bson.M{"_id": bson.ObjectIdHex(OrderId).String()})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -178,7 +186,16 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request){
 func GetOrders(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-type", "application/json")
 	var orders []models.Order
-	cur, err := orderCollection.Find(context.Background(), bson.M{})
+	email := r.Header.Get("email")
+	fmt.Println(email)
+	var user models.User
+	err := userCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(user.Id)
+	cur, err := orderCollection.Find(context.Background(), bson.M{"user": user.Id})
+	//cur, err := orderCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
