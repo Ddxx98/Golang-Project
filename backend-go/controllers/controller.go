@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
-
 	"encoding/json"
 	"log"
 	"time"
 
 	"golang-project/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	// "go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo/readpref"
 	//"go.mongodb.org/mongo-driver/bson"
@@ -18,6 +17,7 @@ import (
 
 	//"go.mongodb.org/mongo-driver/bson"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 	"labix.org/v2/mgo/bson"
 
@@ -150,9 +150,10 @@ func CancelOrder(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	OrderId := strings.Split(r.URL.Path, "/")[2]
+	params := mux.Vars(r)
+	OrderId,_ := primitive.ObjectIDFromHex(params["id"])
 	fmt.Println(OrderId)
-	result,err := orderCollection.DeleteOne(context.Background(), bson.M{"_id": bson.ObjectIdHex(OrderId).String()})
+	result, err := orderCollection.DeleteOne(context.Background(), bson.M{"_id": OrderId})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,7 +196,6 @@ func GetOrders(w http.ResponseWriter, r *http.Request){
 	}
 	fmt.Println(user.Id)
 	cur, err := orderCollection.Find(context.Background(), bson.M{"user": user.Id})
-	//cur, err := orderCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -212,4 +212,23 @@ func GetOrders(w http.ResponseWriter, r *http.Request){
 	}
 	cur.Close(context.Background())
 	json.NewEncoder(w).Encode(orders)
+}
+
+//Update order
+func UpdateOrder(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	params := mux.Vars(r)
+	OrderId,_ := primitive.ObjectIDFromHex(params["id"])
+	var order models.Order
+	_ = json.NewDecoder(r.Body).Decode(&order)
+	fmt.Println(order)
+	order.Id = OrderId
+	result, err := orderCollection.ReplaceOne(context.Background(), bson.M{"_id": OrderId}, order)
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewEncoder(w).Encode(result)
 }
