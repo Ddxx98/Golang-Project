@@ -232,3 +232,16 @@ func UpdateOrder(w http.ResponseWriter, r *http.Request){
 	}
 	json.NewEncoder(w).Encode(result)
 }
+
+//Get order By ID
+func GetOrderById(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-type", "application/json")
+	params := mux.Vars(r)
+	OrderId,_ := primitive.ObjectIDFromHex(params["id"])
+	var order models.Order
+	err := orderCollection.FindOne(context.Background(),bson.M{"_id":OrderId}).Decode(&order)
+	if err != nil{
+		log.Fatal(err)
+	}
+	json.NewEncoder(w).Encode(order)
+}
